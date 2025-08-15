@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برنامج راتبي</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const categorySelect = document.getElementById('category');
+            const rankSelect = document.getElementById('rank');
+            const degreeSelect = document.getElementById('degree');
+            const familyStatusSelect = document.getElementById('family_status');
+            const childrenCountSelect = document.getElementById('children_count');
+            const seniorChildrenSelect = document.getElementById('senior_children');
+            const solidarityCheckbox = document.getElementById('solidarity_checkbox');
+            const exportPdfButton = document.getElementById('export_pdf');
+            
+            const data = JSON.parse('{{ data | tojson | safe }}');
+
+            categorySelect.addEventListener('change', () => {
+                const selectedCategory = categorySelect.value;
+                const ranks = data[selectedCategory] || [];
+                rankSelect.innerHTML = '<option value="">اختر رتبة</option>';
+                ranks.forEach(rank => {
+                    const option = document.createElement('option');
+                    option.value = rank;
+                    option.textContent = rank;
+                    rankSelect.appendChild(option);
+                });
+                updateCalculations();
+            });
+
+            const updateCalculations = async () => {
+                const payload = {
+                    category: categorySelect.value,
+                    rank: rankSelect.value,
+                    degree: degreeSelect.value,
+                    familyStatus: familyStatusSelect.value,
+                    childrenCount: childrenCountSelect.value,
+                    seniorChildrenCount: seniorChildrenSelect.value,
+                    isSolidarity: solidarityCheckbox.checked
+                };
+                try {
+                    const response = await fetch('/calculate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const results = await response.json();
+                    if (results.error) {
+                        console.error('Calculation Error:', results.error);
+                        return;
+                    }
+                    document.getElementById('category_id').textContent = results.category_id || '0.00';
+                    document.getElementById('base_salary').textContent = results.base_salary || '0.00';
+                    document.getElementById('mihania').textContent = results.mihania || '0.00';
+                    document.getElementById('principal_salary').textContent = results.principal_salary || '0.00';
+                    document.getElementById('technical_allowance').textContent = results.technical_allowance || '0.00';
+                    document.getElementById('risk_allowance').textContent = results.risk_allowance || '0.00';
+                    document.getElementById('taahil_allowance').textContent = results.taahil_allowance || '0.00';
+                    document.getElementById('tawthik_allowance').textContent = results.tawthik_allowance || '0.00';
+                    document.getElementById('pedagogie_allowance').textContent = results.pedagogie_allowance || '0.00';
+                    document.getElementById('school_support_allowance').textContent = results.school_support_allowance || '0.00';
+                    document.getElementById('management_allowance').textContent = results.management_allowance || '0.00';
+                    document.getElementById('finance_management_allowance').textContent = results.finance_management_allowance || '0.00';
+                    document.getElementById('forfait_allowance').textContent = results.forfait_allowance || '0.00';
+                    document.getElementById('gross_salary').textContent = results.gross_salary || '0.00';
+                    document.getElementById('cnas_deduction').textContent = results.cnas_deduction || '0.00';
+                    document.getElementById('imposable_salary').textContent = results.imposable_salary || '0.00';
+                    document.getElementById('irg_deduction').textContent = results.irg_deduction || '0.00';
+                    document.getElementById('solidarity_deduction').textContent = results.solidarity_deduction || '0.00';
+                    document.getElementById('total_deductions').textContent = results.total_deductions || '0.00';
+                    document.getElementById('single_salary').textContent = results.single_salary || '0.00';
+                    document.getElementById('family_grants').textContent = results.family_grants || '0.00';
+                    document.getElementById('family_super_grants').textContent = results.family_super_grants || '0.00';
+                    document.getElementById('net_salary').textContent = results.net_salary || '0.00';
+                    document.getElementById('performance_allowance').textContent = results.performance_allowance || '0.00';
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
+            };
+            
+            const inputs = [categorySelect, rankSelect, degreeSelect, familyStatusSelect, childrenCountSelect, seniorChildrenSelect, solidarityCheckbox];
+            inputs.forEach(input => input.addEventListener('change', updateCalculations));
+
+            exportPdfButton.addEventListener('click', async () => {
+                const payload = {
+                    academy: document.getElementById('academy').value,
+                    establishment: document.getElementById('establishment').value,
+                    employee_name: document.getElementById('employee_name').value,
+                    category: categorySelect.value,
+                    rank: rankSelect.value,
+                    degree: degreeSelect.value,
+                    family_status: familyStatusSelect.value,
+                    children_count: childrenCountSelect.value,
+                    senior_children_count: seniorChildrenSelect.value,
+                    is_solidarity: solidarityCheckbox.checked
+                };
+            
+                try {
+                    const response = await fetch('/generate_pdf', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+            
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = 'salary_slip.pdf';
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    } else {
+                        const error = await response.json();
+                        alert('Error generating PDF: ' + error.error);
+                    }
+                } catch (error) {
+                    console.error('PDF generation failed:', error);
+                }
+            });
+
+            updateCalculations();
+        });
+    </script>
+</head>
+<body>
+    <div class="logo">
+        <img src="/static/imgs/ratiby.png" alt="logo">
+       <h1 class="title">راتبـــــــي</h1>
+    </div>
+    <div class="container">
+        <div class="main-content">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="employee_name">إسم الموظف:</label>
+                    <input type="text" id="employee_name" name="employee_name">
+                </div>
+                <div class="input-group">
+                    <label for="academy">الولاية:</label>
+                    <input type="text" id="academy" name="academy">
+                </div>
+                <div class="input-group">
+                    <label for="establishment">المؤسسة:</label>
+                    <input type="text" id="establishment" name="establishment">
+                </div>
+                <div class="input-group">
+                    <label for="category">السلك:</label>
+                    <select id="category" name="category">
+                        <option value="">اختر سلكاً</option>
+                        {% for key in data.keys() %}
+                        <option value="{{ key }}">{{ key }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="rank">الرتبة:</label>
+                    <select id="rank" name="rank">
+                        <option value="">اختر رتبة</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="degree">الدرجة:</label>
+                    <select id="degree" name="degree">
+                        <option value="0">0</option>
+                        {% for i in range(1, 13) %}
+                        <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="family_status">الحالة العائلية:</label>
+                    <select id="family_status" name="family_status">
+                        <option value="أعزب">أعزب</option>
+                        <option value="متزوج">متزوج</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="children_count">عدد الأولاد:</label>
+                    <select id="children_count" name="children_count">
+                        {% for i in range(11) %}
+                        <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="senior_children">فوق 10 سنوات:</label>
+                    <select id="senior_children" name="senior_children">
+                        {% for i in range(6) %}
+                        <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="solidarity_checkbox">إقتطاع التعاضدية</label>
+                    <input type="checkbox" id="solidarity_checkbox" name="solidarity_checkbox" checked>
+                </div>
+                <div class="input-group">
+                    <button id="export_pdf">تصدير إلى PDF</button>
+                </div>
+            </div>
+            
+            <div class="result-section">
+                <div class="results-box">
+                    <div class="result-line">
+                        <span>الصنف:</span>
+                        <span class="value" id="category_id">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>الأجر القاعدي:</span>
+                        <span class="value" id="base_salary">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>م الخبرة المهنية:</span>
+                        <span class="value" id="mihania">0.00</span>
+                    </div>
+                    <div class="result-line principal-salary">
+                        <span>الأجر الرئيسي:</span>
+                        <span class="value" id="principal_salary">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>م الخدمات التقنية:</span>
+                        <span class="value" id="technical_allowance">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>م تعويض الضرر:</span>
+                        <span class="value" id="risk_allowance">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>منحة التأهيل:</span>
+                        <span class="value" id="taahil_allowance">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>منحة التوثيق:</span>
+                        <span class="value" id="tawthik_allowance">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>المنحة البيداغوجية:</span>
+                        <span class="value" id="pedagogie_allowance">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>م الدعم المدرسي:</span>
+                        <span class="value" id="school_support_allowance">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>م إدارة م التعليمية:</span>
+                        <span class="value" id="management_allowance">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>م التسيير المالي:</span>
+                        <span class="value" id="finance_management_allowance">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>منحة جزافية:</span>
+                        <span class="value" id="forfait_allowance">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>الأجر الوحيد:</span>
+                        <span class="value" id="single_salary">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>منح عائلية:</span>
+                        <span class="value" id="family_grants">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>م عائلية إضافية:</span>
+                        <span class="value" id="family_super_grants">0.00</span>
+                    </div>
+                    <div class="result-line total-salary">
+                        <span>إجمالي الأجر الخام:</span>
+                        <span class="value" id="gross_salary">0.00</span>
+                    </div>
+                </div>
+
+                <div class="results-box">
+                    <div class="result-line">
+                        <span>إقتطاع ض إ (CNAS):</span>
+                        <span class="value" id="cnas_deduction">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>الأجر الخاضع للضريبة:</span>
+                        <span class="value" id="imposable_salary">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>الضريبة على الدخل (IRG):</span>
+                        <span class="value" id="irg_deduction">0.00</span>
+                    </div>
+                    <div class="result-line">
+                        <span>إقتطاع التعاضدية:</span>
+                        <span class="value" id="solidarity_deduction">0.00</span>
+                    </div>
+                    <div class="result-line total-deduction">
+                        <span>مجموع الاقتطاعات:</span>
+                        <span class="value" id="total_deductions">0.00</span>
+                    </div>
+                </div>
+
+                <div class="results-box">
+                    <div class="result-line final-salary">
+                        <span>الأجر الصافي:</span>
+                        <span class="value" id="net_salary">0.00</span>
+                    </div>
+                    <div class="result-line performance-allowance">
+                        <span>منحة المردودية /3 أشهر:</span>
+                        <span class="value" id="performance_allowance">0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

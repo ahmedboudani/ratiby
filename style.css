@@ -1,0 +1,213 @@
+/* salary/static/style.css */
+/* salary/static/style.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 5px;
+    padding: 0;
+    background-color: rgb(95, 85, 85);
+    box-shadow: 0 4px 4px #EF9815;
+}
+
+.logo {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: black;
+    border-bottom: 2px solid #EF9815; /* الخط أسفل الشريط */
+    margin-bottom: 10px; /* فراغ بعد الشريط */
+    animation: borderGrow 0.6s ease-out; /* تأثير الخط */
+}
+
+.logo img {
+    height: 40px;
+    background-color: #EF9815; /* لون إطار اللوجو */
+    padding: 5px;
+    border-radius: 50%; /* شكل دائري */
+}
+
+.logo .title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #EF9815;
+    margin: 0;
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bold;
+}
+
+/* الحركة */
+@keyframes borderGrow {
+    from {
+        border-bottom-width: 0;
+    }
+    to {
+        border-bottom-width: 2px;
+    }
+}
+
+
+.logo h3 {
+    margin: 5px;
+    color: #EF9815;
+}
+
+.main-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    background-color: white;
+  
+}
+
+.input-section {
+    flex: 1;
+    min-width: 350px;
+    padding: 5px;
+    background: rgb(177, 173, 173) url("/static/imgs/ratiby.png") no-repeat center bottom;
+    background-size: contain;
+    box-shadow: 0 4px 4px #EF9815;
+    border-radius: 5px;
+    margin: 15px;
+}
+
+
+.input-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+    margin-bottom: 6px; /* مسافة أقل بين الحقول */
+}
+
+.input-group label {
+    flex: 1;
+    font-weight: bold;
+    font-size: 0.95rem;
+    background-color:black ;
+    color: #EF9815;
+    padding: 5px 15px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.input-group input,
+.input-group select {
+    flex: 2;
+    padding: 5px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    max-width: 200px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.input-group input[type="number"] {
+    background-color: #EF9815;
+    color: black;
+    font-weight: bold;
+}
+
+
+.checkbox-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+}
+
+.checkbox-group input[type="checkbox"] {
+    margin: 0;
+    width: 20px;
+    height: 20px;
+}
+
+#export_pdf {
+    width: 100%;
+    padding: 12px;
+    background-color: black;
+    color: #EF9815;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  
+}
+
+#export_pdf:hover {
+    background-color: #EF9815;
+    color: #111111;
+    font-weight: bold;
+}
+
+.result-section {
+    flex: 2;
+    min-width: 550px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.results-box {
+    background-color: #ccc1c1;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 4px #EF9815;
+}
+
+.result-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+}
+
+.principal-salary {
+    border-bottom: 2px solid #EF9815;
+    font-weight: bold;
+    color: #111111;
+}
+
+.total-salary,
+.total-deduction,
+.final-salary,
+.performance-allowance {
+    font-weight: bold;
+    padding-top: 10px;
+}
+
+.total-salary .value,
+.final-salary .value {
+    color: #28a745;
+}
+
+.total-deduction .value {
+    color: #dc3545;
+}
+
+.performance-allowance {
+    margin-top: 20px;
+    padding-top: 20px;
+}
+
+@media (max-width: 500px) {
+    .input-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .input-group label {
+        width: 100%;
+        text-align: right;
+        border-radius: 4px 4px 0 0;
+    }
+    .input-group input,
+    .input-group select {
+        width: 100%;
+        max-width: 100%;
+    }
+}
